@@ -1352,7 +1352,7 @@ public class FurnitureTable extends JTable implements View, Printable {
         case VOLUME :
            return new SizeRenderer() {
                @Override
-               public Component getTableCellRendererComponent(Jtable table,
+               public Component getTableCellRendererComponent(JTable table,
                    Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                  return super.getTableCellRendererComponent(table,
                      value != null ? ((HomePieceOfFurniture)value).getVolume() : null,
