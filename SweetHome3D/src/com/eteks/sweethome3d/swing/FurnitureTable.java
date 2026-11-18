@@ -750,8 +750,26 @@ public class FurnitureTable extends JTable implements View, Printable {
           return headerRendererLabel;
         }
       };
+    // Print the displayed columns, plus the level column if it's hidden,
+    // without changing the columns displayed on screen
+    List<TableColumn> printedColumns = new ArrayList<TableColumn>();
+    boolean levelColumnDisplayed = false;
     for (int columnIndex = 0, n = columnModel.getColumnCount(); columnIndex < n; columnIndex++) {
-      final TableColumn tableColumn = columnModel.getColumn(columnIndex);
+        TableColumn column = columnModel.getColumn(columnIndex);
+        printedColumns.add(column);
+        if (HomePieceOfFurniture.SortableProperty.LEVEL.equals(column.getIdentifier())) {
+            levelColumnDisplayed = true;
+        }
+    }
+    if (!levelColumnDisplayed && columnModel instanceof FurnitureTableColumnModel) {
+        Home home = (Home) ((FurnitureTreeTableModel) getModel()).getRoot();
+        TableColumn levelColumn = ((FurnitureTableColumnModel) columnModel).
+                getAvailableColumn(HomePieceOfFurniture.SortableProperty.LEVEL);
+        if (levelColumn != null && !home.getLevels().isEmpty()) {
+            printedColumns.add(levelColumn);
+        }
+    }
+    for (final TableColumn tableColumn : printedColumns) {
       // Create a printable column from existing table column
       TableColumn printableColumn = new TableColumn();
       printableColumn.setIdentifier(tableColumn.getIdentifier());
@@ -1009,6 +1027,13 @@ public class FurnitureTable extends JTable implements View, Printable {
    */
   private static class FurnitureTableColumnModel extends DefaultTableColumnModel {
     private Map<HomePieceOfFurniture.SortableProperty, TableColumn> availableColumns;
+
+    /**
+     * Returns the column matching the given property, even if it isn't displayed.
+     */
+    public TableColumn getAvailableColumn(HomePieceOfFurniture.SortableProperty property) {
+        return this.availableColumns.get(property);
+    }
 
     public FurnitureTableColumnModel(Home home, UserPreferences preferences) {
       createAvailableColumns(home, preferences);
